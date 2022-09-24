@@ -1,7 +1,7 @@
 /***********************************************************
- * STM32F410RB_GPIO_driver.h							   *
- * Created By: Devin Schubert							   *
- * Created on: August 25, 2022							   *
+ * STM32F410RB_GPIO_driver.h
+ * Created By: Devin Schubert
+ * Created on: August 25, 2022
  ***********************************************************/
 
 #ifndef INC_STM32F410RB_GPIO_DRIVER_H_
@@ -92,9 +92,9 @@ typedef struct{
 #define GPIO_PIN_PD			2
 
 /***********************************************************
- * 							   							   *
- * 				APIs supported by this driver			   *
- * 							   							   *
+ *
+ * 				APIs supported by this driver
+ *
  ***********************************************************/
 
 /*
@@ -123,7 +123,8 @@ void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t pin_number);
 /*
  * IRQ Configuration and ISR handling
  */
-void GPIO_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnOrDi);
+void GPIO_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnOrDi);
+void GPIO_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority);
 void GPIO_IRQHandling(uint8_t pin_number);
 
 #endif /* INC_STM32F410RB_GPIO_DRIVER_H_ */

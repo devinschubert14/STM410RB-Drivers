@@ -1,7 +1,7 @@
 /***********************************************************
- * STM32F410RB_GPIO_driver.c							   *
- * Created By: Devin Schubert							   *
- * Created on: August 25, 2022							   *
+ * STM32F410RB_GPIO_driver.c
+ * Created By: Devin Schubert
+ * Created on: August 25, 2022
  ***********************************************************/
 #include "stm32f410RB_gpio_driver.h"
 
@@ -31,9 +31,9 @@ void GPIO_PeriClockControl(GPIO_RegDef_t *pGPIOx, uint8_t EnOrDi){
 
 
 /***********************************************************
- * 														   *
- * 				Init and De-init Functions				   *
- * 														   *
+ *
+ * 				Init and De-init Functions
+ *
  ***********************************************************/
 
 /* Function Name: GPIO_Init
@@ -51,7 +51,33 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle){
 		temp = 0;
 	}
 	else{
+		if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IT_FT){
+			//1. Configure the FTSR
+			EXTI->FTSR |= (1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+			//Clear the corresponding RTSR bit
+			EXTI->RTSR &= ~(1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+		}
+		else if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IT_RT){
+			//1. Configure the RTSR
+			EXTI->RTSR |= (1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+			//Clear the corresponding RTSR bit
+			EXTI->FTSR &= ~(1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+		}
+		else if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IT_RFT){
+			//2. Configure both FTSR and RTSR
+			EXTI->FTSR |= (1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+			EXTI->RTSR |= (1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+		}
 
+		//2. Configure the GPIO port selection in SYSCFG_EXTICR
+		uint8_t temp1 = (pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber / 4);
+		uint8_t temp2 = (pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber % 4);
+		uint8_t portcode = GPIO_BASEADDR_TO_CODE(pGPIOHandle->pGPIOx);
+		SYSCFG_PCLK_EN();
+		SYSCFG->EXTICR[temp1] = portcode << (temp2 * 4);
+
+		//3. Enable the EXTI interrupt delivery using IMR
+		EXTI->IMR |= (1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
 	}
 
 	temp = 0;
@@ -109,9 +135,9 @@ void GPIO_DeInit(GPIO_RegDef_t *pGPIOx){
 
 
 /***********************************************************
- * 														   *
- * 				Data read and write functions			   *
- * 														   *
+ *
+ * 				Data read and write functions
+ *
  ***********************************************************/
 
 /* Function Name: GPIO_ReadFromInputPin
@@ -119,11 +145,10 @@ void GPIO_DeInit(GPIO_RegDef_t *pGPIOx){
  * Params:
  * 	-*pGPIOx: GPIO port from @GPIO_BASEADDR.
  * 	-pin_number: Pin number from @GPIO_PIN_NUMBERS
- * Return: uint8_t:	value read from pin stored in LSB									 */
+ * Return: uint8_t:	value read from pin stored in LSB*/
 uint8_t GPIO_ReadFromInputPin(GPIO_RegDef_t *pGPIOx, uint8_t pin_number){
 	uint8_t value;
 	value = (uint8_t)((pGPIOx->IDR >> pin_number) & 0x00000001);
-	printf("value");
 	return value;
 }
 
@@ -131,7 +156,7 @@ uint8_t GPIO_ReadFromInputPin(GPIO_RegDef_t *pGPIOx, uint8_t pin_number){
  * Desc: Read from GPIO port.
  * Params:
  * 	-*pGPIOx: GPIO port from @GPIO_BASEADDR.
- * Return: uint16_t: Value read from port									*/
+ * Return: uint16_t: Value read from port*/
 
 uint16_t GPIO_ReadFromInputPort(GPIO_RegDef_t *pGPIOx){
 	uint16_t value;
@@ -145,8 +170,8 @@ uint16_t GPIO_ReadFromInputPort(GPIO_RegDef_t *pGPIOx){
  * Params:
  * 	-*pGPIOx: GPIO port from @GPIO_BASEADDR.
  * 	-pin_number: Pin number from @GPIO_PIN_NUMBERS
- * 	-value: put value wanted output to pin in LSB
- * Return: None										*/
+ * 	-value: put value wanted output to pin in LSB of 8-bit num
+ * Return: None */
 void GPIO_WriteToOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t pin_number, uint8_t value){
 	if(value == SET){
 		//write 0
@@ -162,8 +187,8 @@ void GPIO_WriteToOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t pin_number, uint8_t va
  * Desc: Write given value to output port.
  * Params:
  * 	-*pGPIOx: GPIO port from @GPIO_BASEADDR.
- * 	-value: 8-bit value taht will be output to port.
- * Return: None										*/
+ * 	-value: 8-bit value that will be output to port.
+ * Return: None */
 void GPIO_WriteToOutputPort(GPIO_RegDef_t *pGPIOx, uint8_t value){
 	pGPIOx->ODR = value;
 }
@@ -184,5 +209,48 @@ void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t pin_number){
  * 			IRQ Configuration and ISR handling		 	   *
  * 														   *
  ***********************************************************/
-void GPIO_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnOrDi);
-void GPIO_IRQHandling(uint8_t pin_number);
+void GPIO_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnOrDi){
+	if(EnOrDi == ENABLE){
+		if(IRQNumber <= 31){
+			//program ISER0 register
+			*NVIC_ISER0 |= (1 << IRQNumber);
+		}
+		else if(IRQNumber > 31 && IRQNumber < 64){
+			//program ISER1 register
+			*NVIC_ISER1 |= (1 << (IRQNumber % 32));
+		}
+		else if(IRQNumber >= 64 && IRQNumber < 96){
+			//program ISER2 register
+			*NVIC_ISER3 |= (1 << (IRQNumber % 64));
+		}
+	}
+	else{
+		if(IRQNumber <= 31){
+				//program ICER0 register
+				*NVIC_ICER0 |= (1 << IRQNumber);
+			}else if(IRQNumber > 31 && IRQNumber < 64){
+				//program ICER1 register
+				*NVIC_ICER1 |= (1 << (IRQNumber % 32));
+			}else if(IRQNumber >= 64 && IRQNumber < 96){
+				//program ICER2 register
+				*NVIC_ICER3 |= (1 << (IRQNumber % 64));
+			}
+	}
+}
+
+void GPIO_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority){
+	//1. first find the ipr register
+	uint8_t iprx = IRQNumber / 4;
+	uint8_t iprx_section = IRQNumber % 4;
+
+	uint8_t shift_amt = (8 * iprx_section) + (8 - NO_PR_BITS_IMPLEMENTED);
+	*(NVIC_PR_BASE_ADDR + iprx) |= (IRQPriority << shift_amt);
+}
+
+void GPIO_IRQHandling(uint8_t pin_number){
+	//clear the exti pr register corresponding to the pin number
+	if(EXTI->PR & (1 << pin_number)){
+		//clear
+		EXTI->PR |= (1 << pin_number);
+	}
+}

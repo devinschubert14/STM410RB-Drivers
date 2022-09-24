@@ -10,9 +10,38 @@
 #include <stdint.h>
 
 /***********************************************************
- *														   *
- * 				STM32F410RB Address Macros			       *
- *														   *
+ *
+ * 				Processor Specific Details
+ *
+ ***********************************************************/
+/*
+ * ARM Cortex Mx Processor NVIC ISERx register addresses
+ */
+
+#define NVIC_ISER0 ((volatile uint32_t*)0xE000E100 )
+#define NVIC_ISER1 ((volatile uint32_t*)0xE000E104 )
+#define NVIC_ISER2 ((volatile uint32_t*)0xE000E108 )
+#define NVIC_ISER3 ((volatile uint32_t*)0xE000E10C )
+
+/*
+ * ARM Cortex Mx Processor NVIC ISERx register addresses
+ */
+
+#define NVIC_ICER0 ((volatile uint32_t*)0xE000E180 )
+#define NVIC_ICER1 ((volatile uint32_t*)0xE000E184 )
+#define NVIC_ICER2 ((volatile uint32_t*)0xE000E188 )
+#define NVIC_ICER3 ((volatile uint32_t*)0xE000E18C )
+
+/*
+ * ARM Cortex Mx Processor Priority Register Address Calculation
+ */
+#define NVIC_PR_BASE_ADDR ((volatile uint32_t*)0xE000E400)
+
+#define NO_PR_BITS_IMPLEMENTED 4
+/***********************************************************
+ *
+ * 				STM32F410RB Address Macros
+ *
  ***********************************************************/
 
 /*Base Addresses of Flash and ROM memories*/
@@ -58,9 +87,9 @@
 #define USART1_BASEADDR (APB2PERIPH_BASEADDR + 0x1000U)
 #define USART6_BASEADDR (APB2PERIPH_BASEADDR + 0x1400U)
 //EXTI
-#define EXTI_BASEADDR (APB2PERIPH_BASEADDR + 0x3C00U)
+#define EXTI_BASEADDR (APB2PERIPH_BASE + 0x3C00U)
 //SYSCFG
-#define SYSCFG_BASEADDR (APB2PERIPH_BASEADDR + 0x3800U)
+#define SYSCFG_BASEADDR (APB2PERIPH_BASE + 0x3800U)
 
 
 
@@ -119,6 +148,34 @@ typedef struct{
 }RCC_RegDef_t;
 
 
+/*
+ * Peripheral Register Definition for EXTI
+ */
+typedef struct {
+	volatile uint32_t IMR;			//Interrupt mask register													Address Offset: 0x00
+	volatile uint32_t EMR;			//Event mask register														Address Offset: 0x04
+	volatile uint32_t RTSR;			//Rising trigger selection register											Address Offset: 0x08
+	volatile uint32_t FTSR;			//Falling trigger selection register										Address Offset: 0x0C
+	volatile uint32_t SWIER;		//Software interrupt event register											Address Offset: 0x10
+	volatile uint32_t PR;			//Pending register															Address Offset: 0x14
+}EXTI_RegDef_t;
+
+
+/*
+ * Peripheral Register Definition for SysCfg
+ */
+typedef struct {
+	volatile uint32_t MEMRMP;		//SYSCFG memory remap register												Address Offset: 0x00
+	volatile uint32_t PMC;			//SYSCFG peripheral mode configuration register								Address Offset: 0x04
+	volatile uint32_t EXTICR[4];	//SYSCFG external interrupt configuration register 1-4						Address Offset: 0x08-0x14
+	uint32_t RESERVED1;				//Reserved, 0x18
+	volatile uint32_t CFGR2;		//SYSCFG configuration register 2											Address Offset: 0x1C
+	volatile uint32_t CMPCR;		//Compensation cell control register										Address Offset: 0x20
+	uint32_t RESERVED2[2];			//Reserved, 0x24-0x28
+	volatile uint32_t CFGR;			//SYSCFG configuration register 1											Address Offset: 0x2C
+}SYSCFG_RegDef_t;
+
+
 /* @GPIO_BASEADDR
  * GPIO Register Definitions
  */
@@ -132,8 +189,9 @@ typedef struct{
  */
 #define RCC ((RCC_RegDef_t*)RCC_BASEADDR)
 
+#define EXTI ((EXTI_RegDef_t*)EXTI_BASEADDR)
 
-
+#define SYSCFG ((SYSCFG_RegDef_t*)SYSCFG_BASEADDR)
 /***********************************************************
  *														   *
  * 					  Clock Macros						   *
@@ -217,9 +275,32 @@ typedef struct{
 #define GPIOC_REG_RESET() do{ (RCC->AHB1RSTR |= (1 << 2)); (RCC->AHB1RSTR &= ~(1 << 2)); }while(0)
 #define GPIOH_REG_RESET() do{ (RCC->AHB1RSTR |= (1 << 7)); (RCC->AHB1RSTR &= ~(1 << 7)); }while(0)
 
+/*
+ * Macros to reset GPIOx peripherals
+ */
+#define GPIO_BASEADDR_TO_CODE(x) ( (x == GPIOA)?0:\
+								   (x == GPIOB)?1:\
+								   (x == GPIOC)?2:\
+								   (x == GPIOH)?3:0 )
+/*
+ * IRQ Number of STM32F410RB MCU
+ */
+#define IRQ_NO_EXIT0 6
+#define IRQ_NO_EXTI1 7
+#define IRQ_NO_EXTI2 8
+#define IRQ_NO_EXTI3 9
+#define IRQ_NO_EXTI4 10
+#define IRQ_NO_EXTI9_5 23
+#define IRQ_NO_EXTI15_10 40
 
-
-
+/*
+ * macros for all the possible priority levels
+ */
+#define NVIC_IRQ_PRI0 0
+#define NVIC_IRQ_PRI15 15
+/*
+ * General Macros
+ */
 #define ENABLE 1
 #define DISABLE 0
 #define SET ENABLE
