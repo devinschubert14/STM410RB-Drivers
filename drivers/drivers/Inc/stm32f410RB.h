@@ -82,7 +82,7 @@
 /*Base addresses of APB2 peripherals*/
 
 //SPI
-#define SPI1_BASEADDR (APB2PERIPH_BASEADDR + 0x3000U)
+#define SPI1_BASEADDR (APB2PERIPH_BASE + 0x3000U)
 //USART
 #define USART1_BASEADDR (APB2PERIPH_BASE + 0x1000U)
 #define USART6_BASEADDR (APB2PERIPH_BASE + 0x1400U)
@@ -212,6 +212,7 @@ typedef struct{
  */
 #define SPI1 ((SPI_RegDef_t*)SPI1_BASEADDR)
 #define SPI2 ((SPI_RegDef_t*)SPI2_BASEADDR)
+//#define SPI3 ((SPI_RegDef_t*)SPI3_BASEADDR)
 /***********************************************************
  *														   *
  * 					  Clock Macros						   *
@@ -256,10 +257,10 @@ typedef struct{
 /*
  * Clock Disable Macros for GPIOx Peripherals
  */
-#define GPIOA_PLCK_DI() (RCC->AHB1ENR &= ~(1 << 0))
-#define GPIOB_PLCK_DI() (RCC->AHB1ENR &= ~(1 << 1))
-#define GPIOC_PLCK_DI() (RCC->AHB1ENR &= ~(1 << 2))
-#define GPIOH_PLCK_DI() (RCC->AHB1ENR &= ~(1 << 7))
+#define GPIOA_PCLK_DI() (RCC->AHB1ENR &= ~(1 << 0))
+#define GPIOB_PCLK_DI() (RCC->AHB1ENR &= ~(1 << 1))
+#define GPIOC_PCLK_DI() (RCC->AHB1ENR &= ~(1 << 2))
+#define GPIOH_PCLK_DI() (RCC->AHB1ENR &= ~(1 << 7))
 
 /*
  * Clock Disable Macros for I2Cx Peripherals
