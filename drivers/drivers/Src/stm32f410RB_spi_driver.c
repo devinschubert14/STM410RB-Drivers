@@ -1,4 +1,6 @@
+#include <stdio.h>
 #include "stm32f410RB_spi_driver.h"
+
 
 void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi){
 	if(EnOrDi == ENABLE){
@@ -8,9 +10,9 @@ void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi){
 		else if(pSPIx == SPI2){
 			SPI2_PCLK_EN();
 		}
-		else if(pSPIx == SPI3){
+		/*else if(pSPIx == SPI3){
 			SPI3_PCLK_EN();
-		}
+		}*/
 	}
 	else if(EnOrDi == DISABLE){
 		if(pSPIx == SPI1){
@@ -19,9 +21,10 @@ void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi){
 		else if(pSPIx == SPI2){
 			SPI2_PCLK_EN();
 		}
+		/*
 		else if(pSPIx == SPI3){
 			SPI3_PCLK_EN();
-		}
+		}*/
 	}
 }
 
@@ -60,13 +63,15 @@ void SPI_Init(SPI_Handle_t *pSPIHandle){
 	tempreg |= pSPIHandle->SPIConfig.SPI_SclkSpeed << SPI_CR1_BR;
 
 	//4. Configure the DFF
-	tempreg |= pSPIHandle->SPIConfig_SPI_DFF << SPI_CR1_DFF;
+	tempreg |= pSPIHandle->SPIConfig.SPI_DFF << SPI_CR1_DFF;
 
 	//5. Configure the CPOL
-	tempreg |= pSPIHandle->SPIConfig_SPI_CPOL << SPI_CR1_CPOL;
+	tempreg |= pSPIHandle->SPIConfig.SPI_CPOL << SPI_CR1_CPOL;
 
 	//6. Configure the CPHA
-	tempreg |= pSPIHandle->SPIConfig_SPI_CPHA << SPI_CR1_CPHA;
+	tempreg |= pSPIHandle->SPIConfig.SPI_CPHA << SPI_CR1_CPHA;
+
+	tempreg |= pSPIHandle->SPIConfig.SPI_SSM << SPI_CR1_SSM;
 
 	pSPIHandle->pSPIx->CR1 = tempreg;
 
@@ -91,10 +96,10 @@ void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t len){
 		while(SPI_GetFlagStatus(pSPIx, SPI_TXE_FLAG) == FLAG_RESET);
 
 		//2. check the DFF bit in CR1
-		if(pSPIx->CR1 & (1 << SP1_CR_DFF)){
+		if(pSPIx->CR1 & (1 << SPI_CR1_DFF)){
 			//16-bit
 			//1. load the data in to the DR
-			pSPIx->DR = *((uint16_t*)ptxBuffer);
+			pSPIx->DR = *((uint16_t*)pTxBuffer);
 			len--;
 			len--;
 			(uint16_t*)pTxBuffer++;
@@ -107,8 +112,27 @@ void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t len){
 		}
 	}
 }
-void SPI_ReceiveData(SPI_RegDef_t *pSPIx){
+void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t len){
+	while(len > 0){
+		//1. wait until TXE is set
+		while(SPI_GetFlagStatus(pSPIx, SPI_RXNE_FLAG) == FLAG_RESET);
 
+		//2. check the DFF bit in CR1
+		if(pSPIx->CR1 & (1 << SPI_CR1_DFF)){
+			//16-bit
+			//1. load the data in to the DR
+			*((uint16_t*)pRxBuffer) = pSPIx->DR ;
+			len--;
+			len--;
+			(uint16_t*)pRxBuffer++;
+		}
+		else{
+			//8-bit
+			*pRxBuffer = pSPIx->DR;
+			len--;
+			pRxBuffer++;
+		}
+	}
 }
 
 /*
@@ -122,4 +146,31 @@ void SPI_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority){
 }
 void SPI_IRQHandling(SPI_Handle_t *pHandle){
 
+}
+
+void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi){
+	if(EnOrDi == ENABLE){
+		pSPIx->CR1 |= (1 << SPI_CR1_SPE);
+	}
+	else{
+		pSPIx->CR1 &= ~(1 << SPI_CR1_SPE);
+	}
+}
+
+void SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi){
+	if(EnOrDi == ENABLE){
+			pSPIx->CR1 |= (1 << SPI_CR1_SSI);
+		}
+		else{
+			pSPIx->CR1 &= ~(1 << SPI_CR1_SSI);
+		}
+}
+
+void SPI_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi){
+	if(EnOrDi == ENABLE){
+			pSPIx->CR2 |= (1 << SPI_CR2_SSOE);
+		}
+		else{
+			pSPIx->CR2 &= ~(1 << SPI_CR2_SSOE);
+		}
 }
