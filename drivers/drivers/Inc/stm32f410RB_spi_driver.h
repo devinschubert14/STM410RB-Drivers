@@ -1,3 +1,6 @@
+#ifndef INC_STM32F410RB_SPI_DRIVER_H_
+#define INC_STM32F410RB_SPI_DRIVER_H_
+
 #include "stm32f410RB.h"
 
 typedef struct {
@@ -98,7 +101,7 @@ void SPI_DeInit(SPI_RegDef_t *pSPIx);
  * Data Send and Receive
  */
 void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t len);
-void SPI_ReceiveData(SPI_RegDef_t *pSPIx);
+void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t len);
 
 /*
  * IRQ Configuration and ISR Handling
@@ -110,3 +113,8 @@ void SPI_IRQHandling(SPI_Handle_t *pHandle);
 /*
  * Other Peripheral Functions
  */
+uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx, uint32_t flag_name);
+void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
+void SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
+void SPI_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
+#endif
