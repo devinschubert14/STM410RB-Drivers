@@ -29,7 +29,7 @@ typedef struct{
  */
 #define SPI_BUS_CONFIG_FD				1
 #define SPI_BUS_CONFIG_HD				2
-#define SPI_BUS_CONFIG_SIMPLEX_RXONLY	3
+#define SPI_BUS_CONFIG_SIMPLEX_RXONLY			3
 
 /*
  * @SPI_SclkSpeed
@@ -37,11 +37,11 @@ typedef struct{
 #define SPI_SCLK_SPEED_DIV2				0
 #define SPI_SCLK_SPEED_DIV4				1
 #define SPI_SCLK_SPEED_DIV8				2
-#define SPI_SCLK_SPEED_DIV16			3
-#define SPI_SCLK_SPEED_DIV32			4
-#define SPI_SCLK_SPEED_DIV64			5
-#define SPI_SCLK_SPEED_DIV128			6
-#define SPI_SCLK_SPEED_DIV256			7
+#define SPI_SCLK_SPEED_DIV16				3
+#define SPI_SCLK_SPEED_DIV32				4
+#define SPI_SCLK_SPEED_DIV64				5
+#define SPI_SCLK_SPEED_DIV128				6
+#define SPI_SCLK_SPEED_DIV256				7
 
 /*
  * @SPI_DFF
@@ -64,8 +64,8 @@ typedef struct{
 /*
  * @SPI_SSM
  */
-#define SPI_SSM_EN						1
-#define SPI_SSM_DI						0
+#define SPI_SSM_EN					1
+#define SPI_SSM_DI					0
 
 /*
  * SPI related status flag macros
