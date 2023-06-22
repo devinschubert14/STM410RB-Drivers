@@ -46,7 +46,7 @@ void GPIO_PeriClockControl(GPIO_RegDef_t *pGPIOx, uint8_t EnOrDi){
 
 /***********************************************************
  *
- * 				Init and De-init Functions
+ * 	Init and De-init Functions
  *
  ***********************************************************/
 
@@ -153,7 +153,7 @@ void GPIO_DeInit(GPIO_RegDef_t *pGPIOx){
 
 /***********************************************************
  *
- * 				Data read and write functions
+ * 	Data read and write functions
  *
  ***********************************************************/
 
@@ -222,9 +222,9 @@ void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t pin_number){
 
 
 /***********************************************************
- * 														   *
- * 			IRQ Configuration and ISR handling		 	   *
- * 														   *
+ *
+ * 	IRQ Configuration and ISR handling
+ *
  ***********************************************************/
 void GPIO_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnOrDi){
 	if(EnOrDi == ENABLE){
