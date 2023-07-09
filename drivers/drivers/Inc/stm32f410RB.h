@@ -1,5 +1,5 @@
 /***********************************************************
- * STM32F410RB.h			   
+ * STM32F410RB.h
  * Created By: Devin Schubert
  * Created on: August 25, 2022
  ***********************************************************/
@@ -7,6 +7,7 @@
 #ifndef INC_STM32F410RB_H_
 #define INC_STM32F410RB_H_
 
+#include <stddef.h>
 #include <stdint.h>
 
 /***********************************************************
@@ -190,6 +191,37 @@ typedef struct{
 	volatile uint32_t I2SPR;
 }SPI_RegDef_t;
 
+/*
+ * Peripheral Register Definition for I2Cd
+ */
+typedef struct{
+	volatile uint32_t CR1;
+	volatile uint32_t CR2;
+	volatile uint32_t OAR1;
+	volatile uint32_t OAR2;
+	volatile uint32_t DR;
+	volatile uint32_t SR1;
+	volatile uint32_t SR2;
+	volatile uint32_t CCR;
+	volatile uint32_t TRISE;
+	volatile uint32_t FLTR;
+}I2C_RegDef_t;
+
+
+/*
+ * peripheral register definition structure for USART
+ */
+typedef struct
+{
+	volatile uint32_t SR;
+	volatile uint32_t DR;
+	volatile uint32_t BRR;
+	volatile uint32_t CR1;
+	volatile uint32_t CR2;
+	volatile uint32_t CR3;
+	volatile uint32_t GTPR;
+} USART_RegDef_t;
+
 /* @GPIO_BASEADDR
  * GPIO Register Definitions
  */
@@ -213,6 +245,22 @@ typedef struct{
 #define SPI1 ((SPI_RegDef_t*)SPI1_BASEADDR)
 #define SPI2 ((SPI_RegDef_t*)SPI2_BASEADDR)
 //#define SPI3 ((SPI_RegDef_t*)SPI3_BASEADDR)
+
+/*
+ * I2C Register Definitions
+ */
+#define I2C1 ((I2C_RegDef_t*)I2C1_BASEADDR)
+#define I2C2 ((I2C_RegDef_t*)I2C2_BASEADDR)
+#define I2C4 ((I2C_RegDef_t*)I2C4_BASEADDR)
+
+/*
+ * USART Register Definitions
+ */
+#define USART1 ((USART_RegDef_t*)USART1_BASEADDR)
+#define USART2 ((USART_RegDef_t*)USART2_BASEADDR)
+#define USART6 ((USART_RegDef_t*)USART6_BASEADDR)
+
+
 /***********************************************************
  *
  * 	Clock Macros
@@ -281,7 +329,7 @@ typedef struct{
  */
 #define USART1_PCLK_DI() ((RCC->APB2ENR) &= ~(1 << 4))
 #define USART2_PCLK_DI() ((RCC->APB1ENR) &= ~(1 << 17))
-#define USART6_PCLK_DI() ((RCC->APB2ENR) &= ~1 << 5))
+#define USART6_PCLK_DI() ((RCC->APB2ENR) &= ~(1 << 5))
 
 /*
  * Clock Disable Macros for SYSCFG peripheral
@@ -306,13 +354,23 @@ typedef struct{
 /*
  * IRQ Number of STM32F410RB MCU
  */
-#define IRQ_NO_EXIT0 6
-#define IRQ_NO_EXTI1 7
-#define IRQ_NO_EXTI2 8
-#define IRQ_NO_EXTI3 9
-#define IRQ_NO_EXTI4 10
-#define IRQ_NO_EXTI9_5 23
-#define IRQ_NO_EXTI15_10 40
+#define IRQ_NO_EXIT0 		6
+#define IRQ_NO_EXTI1 		7
+#define IRQ_NO_EXTI2 		8
+#define IRQ_NO_EXTI3 		9
+#define IRQ_NO_EXTI4 		10
+#define IRQ_NO_EXTI9_5 		23
+#define IRQ_NO_EXTI15_10 	40
+#define IRQ_NO_SPI1			35
+#define IRQ_NO_SPI2         36
+#define IRQ_NO_SPI3         51
+#define IRQ_NO_I2C1_EV		31
+#define IRQ_NO_I2C1_ER		32
+#define IRQ_NO_I2C2_EV		33
+#define IRQ_NO_I2C2_ER		34
+#define IRQ_NO_I2C4_EV		95
+#define IRQ_NO_I2C4_ER		96
+
 
 /*
  * macros for all the possible priority levels
@@ -330,7 +388,7 @@ typedef struct{
 #define FLAG_SET SET
 
 /*
- * Bit Position Macros for SPI Peripheral
+ * Bit Position Macros for SPI Registers
  */
 
 //SPI_CR1
@@ -370,6 +428,60 @@ typedef struct{
 #define SPI_SR_BSY			7
 #define SPI_SR_FRE			8
 
+/*
+ * Bit Position Macros for I2C Registers
+ */
+
+//I2C_CR1
+#define I2C_CR1_PE			0
+#define I2C_CR1_NOSTRETCH	7
+#define I2C_CR1_START		8
+#define I2C_CR1_STOP		9
+#define I2C_CR1_ACK			10
+#define I2C_CR1_SWRST		15
+
+//I2C_CR2
+#define I2C_CR2_FREQ		0
+#define I2C_CR2_ITERREN		8
+#define I2C_CR2_ITEVTEN		9
+#define I2C_CR2_ITBUFEN		10
+#define I2C_CR2_DMAEN		11
+#define I2C_CR2_LAST		12
+
+//I2C_OAR1
+#define I2C_OAR1_ADD0		0
+#define I2C_OAR1_ADD71		1
+#define I2C_OAR1_ADD98		8
+#define I2C_OAR1_ADDMODE	15
+
+//I2C_SR1
+#define I2C_SR1_SB			0
+#define I2C_SR1_ADDR		1
+#define I2C_SR1_BTF			2
+#define I2C_SR1_ADD10		3
+#define I2C_SR1_STOPF		4
+#define I2C_SR1_RXNE		6
+#define I2C_SR1_TXE			7
+#define I2C_SR1_BERR		8
+#define I2C_SR1_ARLO		9
+#define I2C_SR1_AF			10
+#define I2C_SR1_OVR			11
+#define I2C_SR1_TIMEOUT		14
+
+//I2C_SR2
+#define I2C_SR2_MSL			0
+#define I2C_SR2_BUSY		1
+#define I2C_SR2_TRA			2
+#define I2C_SR2_GENCALL	 	4
+#define I2C_SR2_DUALF		7
+
+//I2C_CCR
+#define I2C_CCR_CCR			0
+#define I2C_CCR_DUTY		14
+#define I2C_CCR_FS			15
+
 #include "stm32f410RB_gpio_driver.h"
 #include "stm32f410RB_spi_driver.h"
+#include "stm32f410RB_i2c_driver.h"
+#include "stm32f410RB_usart_driver.h"
 #endif /* INC_STM32F410RB_H_ */
