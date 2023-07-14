@@ -399,16 +399,16 @@ uint8_t I2C_MasterSendDataIT(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint3
 		pI2CHandle->DevAddr = slaveAddr;
 		pI2CHandle->Sr = sr;
 
-		//Implement code to Generate START Condition
+		//Generate START Condition
 		I2C_GenerateStartCondition(pI2CHandle->pI2Cx);
 
-		//Implement the code to enable ITBUFEN Control Bit
+		//Enable ITBUFEN Control Bit
 		pI2CHandle->pI2Cx->CR2 |= ( 1 << I2C_CR2_ITBUFEN);
 
-		//Implement the code to enable ITEVTEN Control Bit
+		//Enable ITEVTEN Control Bit
 		pI2CHandle->pI2Cx->CR2 |= ( 1 << I2C_CR2_ITEVTEN);
 
-		//Implement the code to enable ITERREN Control Bit
+		//Enable ITERREN Control Bit
 		pI2CHandle->pI2Cx->CR2 |= ( 1 << I2C_CR2_ITERREN);
 	}
 
@@ -436,16 +436,16 @@ uint8_t I2C_MasterReceiveDataIT(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer, ui
 			pI2CHandle->RxSize = len; //Rxsize is used in the ISR code to manage the data reception
 			pI2CHandle->DevAddr = slaveAddr;
 			pI2CHandle->Sr = sr;
-			//Implement code to Generate START Condition
+			//Generate START Condition
 				I2C_GenerateStartCondition(pI2CHandle->pI2Cx);
 
-			//Implement the code to enable ITBUFEN Control Bit
+			//Enable ITBUFEN Control Bit
 			pI2CHandle->pI2Cx->CR2 |= ( 1 << I2C_CR2_ITBUFEN);
 
-			//Implement the code to enable ITEVTEN Control Bit
+			//Enable ITEVTEN Control Bit
 			pI2CHandle->pI2Cx->CR2 |= ( 1 << I2C_CR2_ITEVTEN);
 
-			//Implement the code to enable ITERREN Control Bit
+			//Enable ITERREN Control Bit
 			pI2CHandle->pI2Cx->CR2 |= ( 1 << I2C_CR2_ITERREN);
 
 		}
@@ -512,7 +512,7 @@ void I2C_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnOrDi)
  */
 void I2C_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority)
 {
-	//1. first lets find out the ipr register
+	//1. Calculate ipr register and section
 	uint8_t iprx = IRQNumber / 4;
 	uint8_t iprx_section  = IRQNumber %4 ;
 
