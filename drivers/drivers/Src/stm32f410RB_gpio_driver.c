@@ -6,11 +6,18 @@
 #include "stm32f410RB_gpio_driver.h"
 
 
+/***********************************************************
+ *
+ * 				Clock Control Functions
+ *
+ ***********************************************************/
+
+
 /* Function Name: GPIO_PeriClockControl
  * Desc: Enables or Disables the peripheral clock for the specified GPIO port.
  * Params:
  * 	- *pGPIOx: GPIO port from @GPIO_BASEADDR
- * 	- EnOrDi: Enable or disable port by using ENABLE/DISBALE or 1/0.
+ * 	- EnOrDi: Enable or disable port by using ENABLE/DISBALE or 0/1.
  * Return: None																*/
 void GPIO_PeriClockControl(GPIO_RegDef_t *pGPIOx, uint8_t EnOrDi){
 	if(EnOrDi == ENABLE){
@@ -46,14 +53,15 @@ void GPIO_PeriClockControl(GPIO_RegDef_t *pGPIOx, uint8_t EnOrDi){
 
 /***********************************************************
  *
- * 	Init and De-init Functions
+ * 				Init and De-init Functions
  *
  ***********************************************************/
 
 /* Function Name: GPIO_Init
  * Desc: Initialize a GPIO port
  * Params: *pGPIOHandle: A handler for the configuration settings and base address of GPIO port.
- * Return: None																*/
+ * Return: None
+ */
 void GPIO_Init(GPIO_Handle_t *pGPIOHandle){
 	uint32_t temp = 0; //temp reg
 
@@ -108,7 +116,7 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle){
 
 	//3. Configure the PUPD settings
 	temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinPuPdControl << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
-	pGPIOHandle->pGPIOx->PUPDR &= ~(0x03 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+	pGPIOHandle->pGPIOx->PUPDR &= ~(0x03 << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
 	pGPIOHandle->pGPIOx->PUPDR |= temp;
 
 	temp = 0;
@@ -153,12 +161,12 @@ void GPIO_DeInit(GPIO_RegDef_t *pGPIOx){
 
 /***********************************************************
  *
- * 	Data read and write functions
+ * 				Data read and write functions
  *
  ***********************************************************/
 
 /* Function Name: GPIO_ReadFromInputPin
- * Desc: Read from pin number specified for GPIO port given.
+ * Desc: Read from pin number specified by GPIO port given.
  * Params:
  * 	-*pGPIOx: GPIO port from @GPIO_BASEADDR.
  * 	-pin_number: Pin number from @GPIO_PIN_NUMBERS
@@ -173,7 +181,8 @@ uint8_t GPIO_ReadFromInputPin(GPIO_RegDef_t *pGPIOx, uint8_t pin_number){
  * Desc: Read from GPIO port.
  * Params:
  * 	-*pGPIOx: GPIO port from @GPIO_BASEADDR.
- * Return: uint16_t: Value read from port*/
+ * Return: uint16_t: Value read from port
+ */
 
 uint16_t GPIO_ReadFromInputPort(GPIO_RegDef_t *pGPIOx){
 	uint16_t value;
@@ -187,8 +196,9 @@ uint16_t GPIO_ReadFromInputPort(GPIO_RegDef_t *pGPIOx){
  * Params:
  * 	-*pGPIOx: GPIO port from @GPIO_BASEADDR.
  * 	-pin_number: Pin number from @GPIO_PIN_NUMBERS
- * 	-value: put value wanted output to pin in LSB of 8-bit num
- * Return: None */
+ * 	-value: SET/RESET or 1/0 will be output to pin
+ * Return: None
+ */
 void GPIO_WriteToOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t pin_number, uint8_t value){
 	if(value == SET){
 		//write 0
@@ -215,17 +225,26 @@ void GPIO_WriteToOutputPort(GPIO_RegDef_t *pGPIOx, uint8_t value){
  * Params:
  * 	-*pGPIOx: GPIO port from @GPIO_BASEADDR.
  * 	-pin_number: Pin number from @GPIO_PIN_NUMBERS
- * Return: None										*/
+ * Return: None
+ */
 void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t pin_number){
 	pGPIOx->ODR ^= (1 << pin_number);
 }
 
 
 /***********************************************************
- *
- * 	IRQ Configuration and ISR handling
- *
+ * 														   *
+ * 			IRQ Configuration and ISR handling		 	   *
+ * 														   *
  ***********************************************************/
+
+/* Function Name: GPIO_IRQInterruptConfig
+ * Desc: Enable/Disable IRQ number on NVIC
+ * Params:
+ * 	- IRQNumber: Numbered pin 1-96 to enable/disable in NVIC.
+ * 	- EnOrDI: ENABLE/DISABLE or 0/1
+ * Return: None */
+
 void GPIO_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnOrDi){
 	if(EnOrDi == ENABLE){
 		if(IRQNumber <= 31){
@@ -255,6 +274,13 @@ void GPIO_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnOrDi){
 	}
 }
 
+/* Function Name: GPIO_IRQPriorityConfig
+ * Desc: Configure priority level of IRQ number provided.
+ * Params:
+ * 	- IRQNumber: Numbered pin 1-96 to set priority of interrupt in NVIC
+ * 	- IRQPriority: Priority number for interrupt
+ * Return: None */
+
 void GPIO_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority){
 	//1. first find the ipr register
 	uint8_t iprx = IRQNumber / 4;
@@ -264,6 +290,11 @@ void GPIO_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority){
 	*(NVIC_PR_BASE_ADDR + iprx) |= (IRQPriority << shift_amt);
 }
 
+/* Function Name: GPIO_IRQHandling
+ * Desc: Clears the pending register in EXTI for provided pin number.
+ * Params:
+ * 	-pin_number: Pin number from @GPIO_PIN_NUMBERS
+ * Return: None */
 void GPIO_IRQHandling(uint8_t pin_number){
 	//clear the exti pr register corresponding to the pin number
 	if(EXTI->PR & (1 << pin_number)){
