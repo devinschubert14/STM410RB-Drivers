@@ -63,7 +63,7 @@ typedef struct{
 
 
 /*
- * I2C related status flag macros
+ * @I2C_Flags
  */
 #define I2C_FLAG_TXE (1 << I2C_SR1_TXE)
 #define I2C_FLAG_RXNE (1 << I2C_SR1_RXNE)
