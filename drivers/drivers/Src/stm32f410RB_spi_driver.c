@@ -1,10 +1,30 @@
 #include <stdio.h>
 #include "stm32f410RB_spi_driver.h"
 
+/***********************************************************
+ *
+ * 				SPI Interrupt Helper Functions
+ *
+ ***********************************************************/
+
 static void SPI_txne_ir_handle(SPI_Handle_t *pSPIHandle);
 static void SPI_rxne_ir_handle(SPI_Handle_t *pSPIHandle);
 static void SPI_ovr_err_ir_handle(SPI_Handle_t *pSPIHandle);
 
+/***********************************************************
+ *
+ * 				Clock and Peripheral Control Functions
+ *
+ ***********************************************************/
+
+
+/* Function Name: SPI_PeriClockControl
+ * Desc: Enables or Disables the peripheral clock for the specified SPI port.
+ * Params:
+ * 	- *pSPIx: SPI port from @SPI_BASEADDR
+ * 	- EnOrDi: Enable or disable port by using ENABLE/DISBALE or 0/1.
+ * Return: None
+ */
 void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 {
 	if (EnOrDi == ENABLE)
@@ -38,8 +58,36 @@ void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 	}
 }
 
-/*
- * Init and De-init
+/* Function Name: SPI_PeripheralControl
+ * Desc: Enables or Disables the peripheral in control register for the specified SPI port.
+ * Params:
+ * 	- *pSPIx: SPI port from @SPI_BASEADDR
+ * 	- EnOrDi: Enable or disable port by using ENABLE/DISBALE or 0/1.
+ * Return: None
+ */
+void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
+{
+	if (EnOrDi == ENABLE)
+	{
+		pSPIx->CR1 |= (1 << SPI_CR1_SPE);
+	}
+	else
+	{
+		pSPIx->CR1 &= ~(1 << SPI_CR1_SPE);
+	}
+}
+
+
+/***********************************************************
+ *
+ * 				Init and De-init Functions
+ *
+ ***********************************************************/
+
+/* Function Name: SPI_Init
+ * Desc: Initialize a SPI port
+ * Params: - *pSPIHandle: A handler for the configuration settings and base address of SPI port.
+ * Return: None
  */
 void SPI_Init(SPI_Handle_t *pSPIHandle)
 {
@@ -92,17 +140,69 @@ void SPI_DeInit(SPI_RegDef_t *pSPIx)
 {
 }
 
-uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx, uint32_t flag_name)
+
+
+
+
+/***********************************************************
+ *
+ * 				SPI Config Functions
+ *
+ ***********************************************************/
+
+/* Function Name: SPI_SSIConfig
+ * Desc: Enables or Disables the SSI bus.
+ * Params:
+ * 	- *pSPIx: SPI port from @SPI_BASEADDR
+ * 	- EnOrDi: Enable or disable port by using ENABLE/DISBALE or 0/1.
+ * Return: None
+ */
+void SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 {
-	if (pSPIx->SR & flag_name)
+	if (EnOrDi == ENABLE)
 	{
-		return FLAG_SET;
+		pSPIx->CR1 |= (1 << SPI_CR1_SSI);
 	}
-	return FLAG_RESET;
+	else
+	{
+		pSPIx->CR1 &= ~(1 << SPI_CR1_SSI);
+	}
 }
 
-/*
- * Data Send and Receive
+/* Function Name: SPI_SSOEConfig
+ * Desc: Enables or Disables the SSOE bus.
+ * Params:
+ * 	- *pSPIOx: SPI port from @SPI_BASEADDR
+ * 	- EnOrDi: Enable or disable port by using ENABLE/DISBALE or 0/1.
+ * Return: None
+ */
+void SPI_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
+{
+	if (EnOrDi == ENABLE)
+	{
+		pSPIx->CR2 |= (1 << SPI_CR2_SSOE);
+	}
+	else
+	{
+		pSPIx->CR2 &= ~(1 << SPI_CR2_SSOE);
+	}
+}
+
+
+
+/***********************************************************
+ *
+ * 				Data Send and Receive
+ *
+ ***********************************************************/
+
+/* Function Name: SPI_SendData
+ * Desc: Write to SPI port with provided data in TxBuffer.
+ * Params:
+ * 	-*pSPIx: SPI port from @SPI_BASEADDR.
+ * 	-pTxBuffer: Pointer to a buffer array to read from
+ * 	-len: Total bytes to send from pTxBuffer
+ * Return: None
  */
 void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t len)
 {
@@ -131,6 +231,15 @@ void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t len)
 		}
 	}
 }
+
+/* Function Name: SPI_ReceiveData
+ * Desc: Read from SPI port to RxBuffer provided.
+ * Params:
+ * 	-*pSPIx: SPI port from @SPI_BASEADDR.
+ * 	-pRxBuffer: Pointer to a buffer array to write to
+ * 	-len: Total bytes to write to pRxBuffer
+ * Return: None
+ */
 void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t len)
 {
 	while (len > 0)
@@ -159,6 +268,20 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t len)
 	}
 }
 
+/***********************************************************
+ *
+ * 				SPI Interrupt Functions
+ *
+ ***********************************************************/
+
+/* Function Name: SPI_SendDataIT
+ * Desc: Write to SPI port with provided data in TxBuffer in nonblocking mode.
+ * Params:
+ * 	-*pSPIHandle: A handler for the configuration settings and base address of SPI port.
+ * 	-pTxBuffer: Pointer to a buffer array to read from
+ * 	-len: Total bytes to send from pTxBuffer
+ * Return: State of SPI from @SPI_AppStates
+ */
 uint8_t SPI_SendDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t len)
 {
 	uint8_t state = pSPIHandle->tx_state;
@@ -177,6 +300,14 @@ uint8_t SPI_SendDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t le
 	}
 	return state;
 }
+/* Function Name: SPI_ReceiveDataIT
+ * Desc: Read from SPI port to RxBuffer provided in nonblocking mode.
+ * Params:
+ * 	-*pSPIHandle: A handler for the configuration settings and base address of SPI port.
+ * 	-pRxBuffer: Pointer to a buffer array to write to
+ * 	-len: Total bytes to write to pRxBuffer
+ * Return: State of SPI from @SPI_AppStates
+ */
 uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t len)
 {
 	uint8_t state = pSPIHandle->rx_state;
@@ -196,9 +327,18 @@ uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t
 	return state;
 }
 
-/*
- * IRQ Configuration and ISR Handling
- */
+/***********************************************************
+ *
+ * 				SPI IRQ Config and Priority
+ *
+ ***********************************************************/
+
+/* Function Name: SPI_IRQInterruptConfig
+ * Desc: Enable/Disable interrupts on NVIC
+ * Params:
+ * 	- IRQNumber: Numbered pin 1-96 to enable/disable in NVIC
+ * 	- EnOrDI: ENABLE/DISABLE or 0/1
+ * Return: None */
 void SPI_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnOrDi)
 {
 	if(EnOrDi == ENABLE)
@@ -236,6 +376,13 @@ void SPI_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnOrDi)
 		}
 	}
 }
+
+/* Function Name: SPI_IRQPriorityConfig
+ * Desc: Configure priority level of IRQ number provided.
+ * Params:
+ * 	- IRQNumber: Numbered pin 1-96 to set priority of interrupt in NVIC
+ * 	- IRQPriority: Priority number for interrupt
+ * Return: None */
 void SPI_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority)
 {
 	//1. first lets find out the ipr register
@@ -246,6 +393,12 @@ void SPI_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority)
 
 	*(  NVIC_PR_BASE_ADDR + iprx ) |=  ( IRQPriority << shift_amount );
 }
+
+/* Function Name: SPI_IRQHandling
+ * Desc: Calls the corresponding interrupt handlers depending on SPI flags set.
+ * Params:
+ * 	-*pSPIHandle: A handler for the configuration settings and base address of SPI port.
+ * Return: None */
 void SPI_IRQHandling(SPI_Handle_t *pHandle)
 {
 	uint8_t temp1, temp2;
@@ -277,43 +430,53 @@ void SPI_IRQHandling(SPI_Handle_t *pHandle)
 		SPI_ovr_err_ir_handle(pHandle);
 }
 
-void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
+/***********************************************************
+ *
+ * 				SPI Flag Functions
+ *
+ ***********************************************************/
+
+/* Function Name: SPI_ClearOVRFlag
+ * Desc: Clears the SPI overrun flag.
+ * Params:
+ * 	-*pSPIx: SPI port from @SPI_BASEADDR.
+ * Return: None
+ */
+void SPI_ClearOVRFlag(SPI_RegDef_t *pSPIx)
 {
-	if (EnOrDi == ENABLE)
-	{
-		pSPIx->CR1 |= (1 << SPI_CR1_SPE);
-	}
-	else
-	{
-		pSPIx->CR1 &= ~(1 << SPI_CR1_SPE);
-	}
+	uint8_t temp;
+	temp = pSPIx->DR;
+	temp = pSPIx->SR;
+	(void)temp;
 }
 
-void SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
+/* Function Name: SPI_GetFlagStatus
+ * Desc: Returns flag status of provided @SPI_Flags
+ * Params:
+ * 	-*pSPIx: SPI port from @SPI_BASEADDR.
+ * 	-flagName: Flag macro from @SPI_Flags
+ * Return: None
+ */
+uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx, uint32_t flagName)
 {
-	if (EnOrDi == ENABLE)
+	if (pSPIx->SR & flagName)
 	{
-		pSPIx->CR1 |= (1 << SPI_CR1_SSI);
+		return FLAG_SET;
 	}
-	else
-	{
-		pSPIx->CR1 &= ~(1 << SPI_CR1_SSI);
-	}
+	return FLAG_RESET;
 }
 
-void SPI_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
-{
-	if (EnOrDi == ENABLE)
-	{
-		pSPIx->CR2 |= (1 << SPI_CR2_SSOE);
-	}
-	else
-	{
-		pSPIx->CR2 &= ~(1 << SPI_CR2_SSOE);
-	}
-}
+/***********************************************************
+ *
+ * 				Helper Functions
+ *
+ ***********************************************************/
 
-// Helper Functions
+/* Function Name:  SPI_txne_ir_handle
+ * Desc: Loads the data from SPI Handle Tx buffer to SPI port data register.
+ * Params:
+ * 	-*pSPIHandle: A handler for the configuration settings and base address of SPI port.
+ * Return: None */
 static void SPI_txne_ir_handle(SPI_Handle_t *pSPIHandle)
 {
 	// 2. check the DFF bit in CR1
@@ -343,6 +506,12 @@ static void SPI_txne_ir_handle(SPI_Handle_t *pSPIHandle)
 		SPI_ApplicationEventCallback(pSPIHandle, SPI_EVENT_TX_CMPLT);
 	}
 }
+
+/* Function Name:  SPI_rxne_ir_handle
+ * Desc: Loads the data from SPI Handle data register to Rx buffer.
+ * Params:
+ * 	-*pSPIHandle: A handler for the configuration settings and base address of SPI port.
+ * Return: None */
 static void SPI_rxne_ir_handle(SPI_Handle_t *pSPIHandle)
 {
 	if (pSPIHandle->pSPIx->CR1 & (1 << SPI_CR1_DFF))
@@ -369,6 +538,11 @@ static void SPI_rxne_ir_handle(SPI_Handle_t *pSPIHandle)
 	}
 }
 
+/* Function Name:  SPI_ovr_err_ir_handle
+ * Desc: Clears the overrun flag flag and informs application.
+ * Params:
+ * 	-*pSPIHandle: A handler for the configuration settings and base address of SPI port.
+ * Return: None */
 static void SPI_ovr_err_ir_handle(SPI_Handle_t *pSPIHandle)
 {
 	uint8_t temp;
@@ -382,6 +556,11 @@ static void SPI_ovr_err_ir_handle(SPI_Handle_t *pSPIHandle)
 	SPI_ApplicationEventCallback(pSPIHandle, SPI_EVENT_OVR_ERR);
 }
 
+/* Function Name:  SPI_CloseTransmission
+ * Desc: Resets SPI Handle transmitting information and disables SPI Tx.
+ * Params:
+ * 	-*pSPIHandle: A handler for the configuration settings and base address of SPI port.
+ * Return: None */
 void SPI_CloseTransmission(SPI_Handle_t *pSPIHandle)
 {
 	pSPIHandle->pSPIx->CR2 &= ~(1 << SPI_CR2_TXEIE);
@@ -389,6 +568,12 @@ void SPI_CloseTransmission(SPI_Handle_t *pSPIHandle)
 	pSPIHandle->tx_len = 0;
 	pSPIHandle->tx_state = SPI_READY;
 }
+
+/* Function Name:  SPI_CloseReception
+ * Desc: Resets SPI Handle receiving information and disables SPI Rx.
+ * Params:
+ * 	-*pSPIHandle: A handler for the configuration settings and base address of SPI port.
+ * Return: None */
 void SPI_CloseReception(SPI_Handle_t *pSPIHandle)
 {
 	pSPIHandle->pSPIx->CR2 &= ~(1 << SPI_CR2_RXNEIE);
@@ -397,14 +582,13 @@ void SPI_CloseReception(SPI_Handle_t *pSPIHandle)
 	pSPIHandle->rx_state = SPI_READY;
 }
 
-void SPI_ClearOVRFlag(SPI_RegDef_t *pSPIx)
-{
-	uint8_t temp;
-	temp = pSPIx->DR;
-	temp = pSPIx->SR;
-	(void)temp;
-}
-
+/* Function Name:  SPI_ApplicationEventCallback
+ * Desc: Weak prototype to be overwritten by programmer and will be called
+ * whenever an applicaton event stated in @SPI_AppEvents occurs
+ * Params:
+ * 	-*pSPIHandle: A handler for the configuration settings and base address of SPI port.
+ * 	- AppEv: Interrupt that was called from SPI port in handle. Events are provided in @SPI_AppEvents.
+ * Return: None */
 __attribute__((weak)) void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle, uint8_t AppEv)
 {
 	// Application implemented
