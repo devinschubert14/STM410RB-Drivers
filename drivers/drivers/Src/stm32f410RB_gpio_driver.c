@@ -286,7 +286,7 @@ void GPIO_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnOrDi){
  * Return: None 
  */
 void GPIO_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority){
-	//1. first find the ipr register
+	//1. Calculate ipr register and section
 	uint8_t iprx = IRQNumber / 4;
 	uint8_t iprx_section = IRQNumber % 4;
 
