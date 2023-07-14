@@ -1,4 +1,6 @@
 # STM410RB-Drivers
-Serial Communication Drivers for the STM32410RB board in C. It includes drivers for GPIO, SPI, I2C, and USART.
+Serial communication drivers for the STM32-F410RB board in C. This source library acts as a Hardware Abstraction Layer for the GPIO, SPI, I2C, and USART peripheral registers on the STM32-F410RB microcontroller board.
 
 For information on how to use the functions, use the provided function descriptions in the header file.
+
+This code is heavily inspired since I coded along with the course on Udemy: [Mastering Microcontroller and Embedded Driver Development](https://www.udemy.com/course/mastering-microcontroller-with-peripheral-driver-development/).
