@@ -18,7 +18,8 @@
  * Params:
  * 	- *pGPIOx: GPIO port from @GPIO_BASEADDR
  * 	- EnOrDi: Enable or disable port by using ENABLE/DISBALE or 0/1.
- * Return: None																*/
+ * Return: None	
+ */
 void GPIO_PeriClockControl(GPIO_RegDef_t *pGPIOx, uint8_t EnOrDi){
 	if(EnOrDi == ENABLE){
 		if(pGPIOx == GPIOA){
@@ -142,7 +143,8 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle){
 /* Function Name: GPIO_DeInit
  * Desc: De-initialize a GPIO port
  * Params: *pGPIOHandle: GPIO port from @GPIO_BASEADDR.
- * Return: None										 */
+ * Return: None
+ */
 void GPIO_DeInit(GPIO_RegDef_t *pGPIOx){
 		if(pGPIOx == GPIOA){
 			GPIOA_REG_RESET();
@@ -170,7 +172,8 @@ void GPIO_DeInit(GPIO_RegDef_t *pGPIOx){
  * Params:
  * 	-*pGPIOx: GPIO port from @GPIO_BASEADDR.
  * 	-pin_number: Pin number from @GPIO_PIN_NUMBERS
- * Return: uint8_t:	value read from pin stored in LSB*/
+ * Return: uint8_t: value read from pin stored in LSB
+ */
 uint8_t GPIO_ReadFromInputPin(GPIO_RegDef_t *pGPIOx, uint8_t pin_number){
 	uint8_t value;
 	value = (uint8_t)((pGPIOx->IDR >> pin_number) & 0x00000001);
@@ -215,7 +218,8 @@ void GPIO_WriteToOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t pin_number, uint8_t va
  * Params:
  * 	-*pGPIOx: GPIO port from @GPIO_BASEADDR.
  * 	-value: 8-bit value that will be output to port.
- * Return: None */
+ * Return: None 
+ */
 void GPIO_WriteToOutputPort(GPIO_RegDef_t *pGPIOx, uint8_t value){
 	pGPIOx->ODR = value;
 }
@@ -233,9 +237,9 @@ void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t pin_number){
 
 
 /***********************************************************
- * 														   *
- * 			IRQ Configuration and ISR handling		 	   *
- * 														   *
+ * 
+ * 			IRQ Configuration and ISR handling
+ * 
  ***********************************************************/
 
 /* Function Name: GPIO_IRQInterruptConfig
@@ -279,8 +283,8 @@ void GPIO_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnOrDi){
  * Params:
  * 	- IRQNumber: Numbered pin 1-96 to set priority of interrupt in NVIC
  * 	- IRQPriority: Priority number for interrupt
- * Return: None */
-
+ * Return: None 
+ */
 void GPIO_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority){
 	//1. first find the ipr register
 	uint8_t iprx = IRQNumber / 4;
@@ -294,7 +298,8 @@ void GPIO_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority){
  * Desc: Clears the pending register in EXTI for provided pin number.
  * Params:
  * 	-pin_number: Pin number from @GPIO_PIN_NUMBERS
- * Return: None */
+ * Return: None 
+ */
 void GPIO_IRQHandling(uint8_t pin_number){
 	//clear the exti pr register corresponding to the pin number
 	if(EXTI->PR & (1 << pin_number)){
