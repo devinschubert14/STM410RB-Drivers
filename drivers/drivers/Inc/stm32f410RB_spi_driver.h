@@ -3,6 +3,10 @@
 
 #include "stm32f410RB.h"
 
+
+/*
+ * Config Definition for SPIx peripheral
+ */
 typedef struct
 {
 	uint8_t SPI_DeviceMode;
@@ -14,6 +18,9 @@ typedef struct
 	uint8_t SPI_SSM;
 } SPI_Config_t;
 
+/*
+ * Handle structure for I2Cx peripheral
+ */
 typedef struct
 {
 	SPI_RegDef_t *pSPIx;
@@ -91,7 +98,7 @@ typedef struct
 #define SPI_SSM_DI 0
 
 /*
- * SPI related status flag macros
+ * @SPI_Flags
  */
 #define SPI_TXE_FLAG (1 << SPI_SR_TXE)
 #define SPI_RXNE_FLAG (1 << SPI_SR_RXNE)
@@ -109,10 +116,10 @@ typedef struct
  **********************************/
 
 /*
- * Peripheral Clock Setup
+ * Peripheral Setup
  */
 void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
-
+void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
 /*
  * Init and De-init
  */
