@@ -114,7 +114,7 @@ static void I2C_ClearADDRFlag(I2C_Handle_t *pI2CHandle){
 /* Function Name: I2C_PeriClockControl
  * Desc: Enables or Disables the peripheral clock for the specified I2C port.
  * Params:
- * 	- *pI2Cx: SPI port from @I2C_BASEADDR
+ * 	- *pI2Cx: I2C port from @I2C_BASEADDR
  * 	- EnOrDi: Enable or disable port by using ENABLE/DISBALE or 0/1.
  * Return: None
  */
@@ -374,7 +374,7 @@ uint8_t I2C_SlaveReceiveData(I2C_RegDef_t *pI2Cx){
 
 /***********************************************************
  *
- * 				SPI Interrupt Functions
+ * 			Interrupt Functions
  *
  ***********************************************************/
 
@@ -523,7 +523,7 @@ void I2C_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority)
 
 /***********************************************************
  *
- * 				I2C Interrupt Helper Functions
+ * 		I2C Interrupt Helper Functions
  *
  ***********************************************************/
 
@@ -761,14 +761,14 @@ void I2C_ER_IRQHandling(I2C_Handle_t *pI2CHandle){
 
 /***********************************************************
  *
- * 				SPI Flag Functions
+ * 			Flag Functions
  *
  ***********************************************************/
 
 /* Function Name: I2C_GetFlagStatus
  * Desc: Returns flag status of provided @I2C_Flags.
  * Params:
- * 	-*pI2Cx: SPI port from @I2C_BASEADDR.
+ * 	-*pI2Cx: I2C port from @I2C_BASEADDR.
  * 	-flagName: Flag macro from @I2C_Flags
  * Return: None
  */
@@ -783,7 +783,7 @@ uint8_t I2C_GetFlagStatus(I2C_RegDef_t *pI2Cx, uint32_t flagName)
 
 /***********************************************************
  *
- * 				Helper Functions
+ * 			Helper Functions
  *
  ***********************************************************/
 
