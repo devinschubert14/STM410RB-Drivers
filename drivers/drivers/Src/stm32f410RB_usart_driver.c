@@ -15,7 +15,7 @@
  ***********************************************************/
 
 /* Function Name: USART_PeriClockControl
- * Desc: Enables or Disables the peripheral clock for the specified I2C port.
+ * Desc: Enables or Disables the peripheral clock for the specified USART port.
  * Params:
  * 	- *pUSARTx: USART port from @USART_BASEADDR
  * 	- EnOrDi: Enable or disable port by using ENABLE/DISBALE or 0/1.
@@ -42,7 +42,7 @@ void USART_PeriClockControl(USART_RegDef_t *pUSARTx, uint8_t EnorDi){
 }
 
 /* Function Name: USART_PeripheralControl
- * Desc: Enables or Disables the peripheral in control register for the specified SPI port.
+ * Desc: Enables or Disables the peripheral in control register for the specified USART port.
  * Params:
  * 	- *pUSARTx: USART port from @USART_BASEADDR
  * 	- EnOrDi: Enable or disable port by using ENABLE/DISBALE or 0/1.
@@ -317,7 +317,7 @@ uint8_t USART_SendDataIT(USART_Handle_t *pUSARTHandle,uint8_t *pTxBuffer, uint32
 
 
 /* Function Name: USART_ReceiveDataIT
- * Desc: Read from SPI port to RxBuffer provided in nonblocking mode.
+ * Desc: Read from I2C port to RxBuffer provided in nonblocking mode.
  * Params:
  * 	-*pUSARTHandle: A handler for the configuration settings and base address of USART port.
  * 	-pRxBuffer: Pointer to a buffer array to write to
